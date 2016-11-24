@@ -17,3 +17,6 @@ Utility.saveAnnotations(testAnnotations, 'testLabels.csv')
 del featureAnnotationsDir, trainAnnotationsFile, testAnnotationsFile
 
 # read baseline features
+baselineFeaturesDir = join(absolutePath, 'baseline-features')
+
+# read baseline IDT features which were extracted from charades dataset

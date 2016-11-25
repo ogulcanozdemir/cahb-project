@@ -19,4 +19,21 @@ del featureAnnotationsDir, trainAnnotationsFile, testAnnotationsFile
 # read baseline features
 baselineFeaturesDir = join(absolutePath, 'baseline-features')
 
+
+import h5py
+import numpy as np
+
+file = h5py.File(baselineFeaturesDir + '\FV_d3_k64.mat', 'r')
+    
+#data = np.array(features.get('FV'))
+
+# assign every label to it's corresponding action class using annotations
+matFiles = file['matFiles/name']
+names = [u''.join(chr(c) for c in file[obj_ref]) for obj_ref in matFiles[0][:]] # FIXME : converting types is too slow
+names = [x[:-15] for x in names]
+
+
+
+
 # read baseline IDT features which were extracted from charades dataset
+#features = Utility.readBaselineIDTFeatures(baselineFeaturesDir + '\FV_d3_k64.mat')

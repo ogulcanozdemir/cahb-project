@@ -1,4 +1,4 @@
-from os.path import dirname, abspath, join
+from os.path import dirname, abspath, join, sep
 from Utility import Utility
 
 # initialize paths for reading process
@@ -6,8 +6,8 @@ absolutePath = dirname(dirname(dirname(abspath("__file__"))))
 featureAnnotationsDir = join(absolutePath, 'feature-annotations')
 
 # read feature annotations of charades dataset
-trainAnnotationsFile = featureAnnotationsDir + '\charades_v04_train.csv'
-testAnnotationsFile = featureAnnotationsDir + '\charades_v04_test.csv'
+trainAnnotationsFile = featureAnnotationsDir + sep + 'charades_v04_train.csv'
+testAnnotationsFile = featureAnnotationsDir + sep + 'charades_v04_test.csv'
 
 trainAnnotations = Utility.readAnnotations(trainAnnotationsFile)
 testAnnotations = Utility.readAnnotations(testAnnotationsFile)
@@ -18,22 +18,27 @@ del featureAnnotationsDir, trainAnnotationsFile, testAnnotationsFile
 
 # read baseline features
 baselineFeaturesDir = join(absolutePath, 'baseline-features')
+featureFile = baselineFeaturesDir + sep + 'FV_d3_k64.mat'
+
+trainData, trainLabels, testData, testLabels = Utility.readBaselineIDTFeatures(featureFile,
+                                                                       trainAnnotations,
+                                                                       testAnnotations)
+del baselineFeaturesDir, featureFile, trainAnnotations, testAnnotations, absolutePath, sep
 
 
-import h5py
-import numpy as np
+# train
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.svm import SVC
+rc = OneVsRestClassifier(SVC(kernel='linear'))
+rc.fit(trainData, trainLabels)
 
-file = h5py.File(baselineFeaturesDir + '\FV_d3_k64.mat', 'r')
-    
-#data = np.array(features.get('FV'))
+rc.predict(testData)
 
-# assign every label to it's corresponding action class using annotations
-matFiles = file['matFiles/name']
-names = [u''.join(chr(c) for c in file[obj_ref]) for obj_ref in matFiles[0][:]] # FIXME : converting types is too slow
-names = [x[:-15] for x in names]
+################################
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.ensemble import RandomForestClassifier
+forest = RandomForestClassifier(n_estimators=100, random_state=1)
+multi_target_forest = MultiOutputClassifier(forest, n_jobs=-1)
+multi_target_forest.fit(trainData, trainLabels)
 
-
-
-
-# read baseline IDT features which were extracted from charades dataset
-#features = Utility.readBaselineIDTFeatures(baselineFeaturesDir + '\FV_d3_k64.mat')
+multi_target_forest.predict(testData)

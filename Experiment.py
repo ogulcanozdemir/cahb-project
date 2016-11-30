@@ -8,7 +8,7 @@ import scipy.io
 
 def trainRandomForest(trainData, trainLabels, testData, testLabels):
     print("\nTraining Random Forest Classifier...")
-    forest = RandomForestClassifier(n_estimators=100, random_state=1, verbose=1)
+    forest = RandomForestClassifier(n_estimators=1000, random_state=0, verbose=1)
     multi_target_forest = MultiOutputClassifier(forest, n_jobs=-1)
     print("\nClassifier")
     print("----------------------------------")
@@ -19,14 +19,22 @@ def trainRandomForest(trainData, trainLabels, testData, testLabels):
     print("\nTraining finished in %0.3fs \n" % (time() - t0))
 
     t0 = time()
-    predictedLabels = multi_target_forest.predict_proba(testData)
+    predictedProba = multi_target_forest.predict_proba(testData)
     print("\nTesting finished in %0.3fs" % (time() - t0))
 
-    print("\nPredicted Labels")
+    print("\nPredicted Probabilities")
     print("----------------------------------")
-    print(predictedLabels)
+    print(predictedProba)
 
-    return predictedLabels
+    t0 = time()
+    predictedLogProba = multi_target_forest.predict_log_proba(testData)
+    print("\nTesting finished in %0.3fs" % (time() - t0))
+
+    print("\nPredicted Log-probabilities")
+    print("----------------------------------")
+    print(predictedLogProba)
+
+    return predictedProba, predictedLogProba
 
 if __name__ == '__main__':
     isLogging = True
@@ -60,9 +68,9 @@ if __name__ == '__main__':
     trainData, trainLabels, testData, testLabels = Utility.readBaselineIDTFeatures(featureFile, trainAnnotations, testAnnotations)
     del baselineFeaturesDir, featureFile, trainAnnotations, testAnnotations, absolutePath, sep
 
-    results = trainRandomForest(trainData, trainLabels, testData, testLabels)
+    resultsProba, resultsLogProba = trainRandomForest(trainData, trainLabels, testData, testLabels)
 
-    scipy.io.savemat('Results_FV_d3_k64.mat', {'results': results})
+    scipy.io.savemat('Results_FV_d3_k64.mat', {'resultsProba': resultsProba, 'resultsLogProba': resultsLogProba})
 
     if isLogging:
         sys.stdout = old_stdout

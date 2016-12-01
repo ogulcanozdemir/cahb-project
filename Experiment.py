@@ -26,15 +26,7 @@ def trainRandomForest(trainData, trainLabels, testData, testLabels):
     print("----------------------------------")
     print(predictedProba)
 
-    t0 = time()
-    predictedLogProba = multi_target_forest.predict_log_proba(testData)
-    print("\nTesting finished in %0.3fs" % (time() - t0))
-
-    print("\nPredicted Log-probabilities")
-    print("----------------------------------")
-    print(predictedLogProba)
-
-    return predictedProba, predictedLogProba
+    return predictedProba
 
 if __name__ == '__main__':
     isLogging = True
@@ -68,9 +60,9 @@ if __name__ == '__main__':
     trainData, trainLabels, testData, testLabels = Utility.readBaselineIDTFeatures(featureFile, trainAnnotations, testAnnotations)
     del baselineFeaturesDir, featureFile, trainAnnotations, testAnnotations, absolutePath, sep
 
-    resultsProba, resultsLogProba = trainRandomForest(trainData, trainLabels, testData, testLabels)
+    resultsProba = trainRandomForest(trainData, trainLabels, testData, testLabels)
 
-    scipy.io.savemat('Results_FV_d3_k64.mat', {'resultsProba': resultsProba, 'resultsLogProba': resultsLogProba})
+    scipy.io.savemat('Results_FV_d3_k64.mat', {'resultsProba': resultsProba})
 
     if isLogging:
         sys.stdout = old_stdout

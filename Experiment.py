@@ -1,15 +1,20 @@
 from os.path import dirname, abspath, join, sep
 from Utility import Utility
-from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.multiclass import OneVsRestClassifier
 import sys
 from time import time
 import scipy.io
+import numpy as np
 
 def trainRandomForest(trainData, trainLabels, testData, testLabels):
     print("\nTraining Random Forest Classifier...")
-    forest = RandomForestClassifier(n_estimators=1000, random_state=0, verbose=1)
-    multi_target_forest = MultiOutputClassifier(forest, n_jobs=-1)
+
+    trainData = np.asarray(trainData)
+    trainLabels = np.asarray(trainLabels)
+
+    forest = RandomForestClassifier(n_estimators=1000, random_state=0, verbose=1, n_jobs=-1)
+    multi_target_forest = OneVsRestClassifier(forest, n_jobs=-1)
     print("\nClassifier")
     print("----------------------------------")
     print(multi_target_forest)
@@ -19,6 +24,14 @@ def trainRandomForest(trainData, trainLabels, testData, testLabels):
     print("\nTraining finished in %0.3fs \n" % (time() - t0))
 
     t0 = time()
+    predictedLabels = multi_target_forest.predict(testData)
+    print("\nTesting finished in %0.3fs" % (time() - t0))
+
+    print("\nPredicted Labels")
+    print("----------------------------------")
+    print(predictedLabels)
+
+    t0 = time()
     predictedProba = multi_target_forest.predict_proba(testData)
     print("\nTesting finished in %0.3fs" % (time() - t0))
 
@@ -26,7 +39,7 @@ def trainRandomForest(trainData, trainLabels, testData, testLabels):
     print("----------------------------------")
     print(predictedProba)
 
-    return predictedProba
+    return predictedProba, predictedLabels
 
 if __name__ == '__main__':
     isLogging = True
@@ -49,8 +62,8 @@ if __name__ == '__main__':
     trainAnnotations = Utility.readAnnotations(trainAnnotationsFile)
     testAnnotations = Utility.readAnnotations(testAnnotationsFile)
     
-    Utility.saveAnnotations(trainAnnotations, 'trainLabels.csv')
-    Utility.saveAnnotations(testAnnotations, 'testLabels.csv')
+    #Utility.saveAnnotations(trainAnnotations, 'trainLabels.csv')
+    #Utility.saveAnnotations(testAnnotations, 'testLabels.csv')
     del featureAnnotationsDir, trainAnnotationsFile, testAnnotationsFile
     
     # read baseline features
@@ -60,9 +73,9 @@ if __name__ == '__main__':
     trainData, trainLabels, testData, testLabels = Utility.readBaselineIDTFeatures(featureFile, trainAnnotations, testAnnotations)
     del baselineFeaturesDir, featureFile, trainAnnotations, testAnnotations, absolutePath, sep
 
-    resultsProba = trainRandomForest(trainData, trainLabels, testData, testLabels)
+    resultsProba, resultsLabels = trainRandomForest(trainData, trainLabels, testData, testLabels)
 
-    scipy.io.savemat('Results_FV_d3_k64.mat', {'resultsProba': resultsProba})
+    scipy.io.savemat('Results_FV_d3_k64.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels})
 
     if isLogging:
         sys.stdout = old_stdout

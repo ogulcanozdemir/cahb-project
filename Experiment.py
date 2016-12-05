@@ -42,7 +42,7 @@ def trainRandomForest(trainData, trainLabels, testData, testLabels):
     return predictedProba, predictedLabels
 
 if __name__ == '__main__':
-    isLogging = False
+    isLogging = True
 
     featureName = "FV_d2_k128" #str(sys.argv[1])
 

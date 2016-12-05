@@ -47,33 +47,45 @@ def trainLinearSVC(trainData, trainLabels, testData, testLabels):
 
     trainData = np.asarray(trainData)
     trainLabels = np.asarray(trainLabels)
+    print(trainData.shape)
+    print(trainLabels.shape)
 
     Cs = np.power(2, np.linspace(-3, 9, num=7))
-    osvc = OneVsRestClassifier(LinearSVC(class_weight='balanced', verbose=False), n_jobs=-1)
-    svc = GridSearchCV(osvc, cv=5, param_grid=dict(C=Cs), n_jobs=-1)
+
+    osvc = OneVsRestClassifier(LinearSVC(class_weight='balanced', verbose=False, multi_class='ovr', max_iter=2000), n_jobs=-1)
+
+    parameters = {
+        "estimator__C" : Cs,
+    }
+
+    svc = GridSearchCV(osvc, cv=5, param_grid=parameters, n_jobs=-1)
 
     t0 = time()
-    svc.fit(trainData, trainLabels.ravel())
+    svc.fit(trainData, trainLabels)
     print("\nTraining finished in %0.3fs \n" % (time() - t0))
+
+    print("Best parameters: ")
+    print(svc.best_params_)
+    print("\nBest estimator: ")
+    print(svc.best_estimator_)
+    print("Best score: ")
+    print(svc.best_score_)
+
+    t0 = time()
+    confidence_scores = svc.decision_function(testData)
+    print("\nTesting finished in %0.3fs" % (time() - t0))
 
     t0 = time()
     predictedLabels = svc.predict(testData)
     print("\nTesting finished in %0.3fs" % (time() - t0))
 
-    t0 = time()
-    predictedProba = svc.predict_proba(testData)
-    print("\nTesting finished in %0.3fs" % (time() - t0))
-
-    t0 = time()
-    predictedLogProba = svc.predict_log_proba(testData)
-    print("\nTesting finished in %0.3fs" % (time() - t0))
 
     print("\nPredicted Labels")
     print("----------------------------------")
     print(predictedLabels)
 
-    print("\nPredicted Probabilities")
+    print("\nConfidence Scores")
     print("----------------------------------")
-    print(predictedProba)
+    print(confidence_scores)
 
-    return predictedProba, predictedLogProba, predictedLabels
+    return confidence_scores, predictedLabels

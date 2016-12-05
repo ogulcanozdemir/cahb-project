@@ -2,6 +2,7 @@ import csv
 import h5py
 import numpy as np
 from os.path import join
+from sklearn.preprocessing import MultiLabelBinarizer
 
 class Utility:
     
@@ -12,7 +13,7 @@ class Utility:
     
         # assign every label to it's corresponding action class using annotations
         matFiles = file['matFiles/name']
-        videoIndexes = [u''.join(chr(c) for c in file[obj_ref]) for obj_ref in matFiles[0][:]] # FIXME : type casting is too slow
+        videoIndexes = [u''.join(chr(c) for c in file[obj_ref]) for obj_ref in matFiles[0][0:20]] # FIXME : type casting is too slow
         videoIndexes = [x[:-15] for x in videoIndexes]
 
         features = file['FV']
@@ -58,9 +59,7 @@ class Utility:
             _ = next(file)
             reader = csv.reader(file)   
             for row in reader:
-                #actionClasses = row[11].split(';')
-                #actionClasses = [x[:4] for x in row[11].split(';')]
-                #classes = np.asarray(actionClasses)
+                #classes = MultiLabelBinarizer().fit_transform(row[11])
                 classes = Utility.__mapActionClasses(row[11])
                 rowDict = { 'aid' : row[0], 'classes':  classes}
                 data.append(rowDict)

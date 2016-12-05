@@ -3,9 +3,12 @@ from Utility import Utility
 import Classifier
 import sys
 import scipy.io
+import warnings
+import numpy as np
 
 if __name__ == '__main__':
-    isLogging = False
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    isLogging = True
 
     featureName = "FV_d3_k64"
 
@@ -35,8 +38,10 @@ if __name__ == '__main__':
     #scipy.io.savemat('rf_' + featureName + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels})
 
     # train one-vs-rest linear svc with 5-fold cross validation
-    resultsProba, resultsLogProba, resultsLabels = Classifier.trainLinearSVC(trainData, trainLabels, testData, testLabels)
-    scipy.io.savemat('svc_' + featureName + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels, 'resultsLogProba': resultsLogProba})
+    resultsProba, resultsLabels = Classifier.trainLinearSVC(trainData, trainLabels, testData, testLabels)
+
+    list1 = np.array(testAnnotations_subsampled, dtype=np.object)
+    scipy.io.savemat('svc_' + featureName + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels, 'testAnnotations': list1})
 
     if isLogging:
         sys.stdout = old_stdout

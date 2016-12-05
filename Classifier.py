@@ -97,14 +97,14 @@ def trainELMClassifier(trainData, trainLabels, testData, testLabels):
     print(trainLabels.shape)
 
     # create initialize elm activation functions
-    nh = 1000
-    rbf_rhl = RBFRandomLayer(n_hidden=nh, random_state=0, rbf_width=0.001)
-    #srhl_tanh = MLPRandomLayer(n_hidden=nh, activation_func='tanh')
+    nh = 100
+    #rbf_rhl = RBFRandomLayer(n_hidden=nh, random_state=0, rbf_width=0.001)
+    srhl_tanh = MLPRandomLayer(n_hidden=nh, activation_func='tanh')
     #srhl_tribas = MLPRandomLayer(n_hidden=nh, activation_func='tribas')
     #srhl_hardlim = MLPRandomLayer(n_hidden=nh, activation_func='hardlim')
 
     # initialize ELM Classifier
-    elm = GenELMClassifier(hidden_layer=rbf_rhl)
+    elm = GenELMClassifier(hidden_layer=srhl_tanh)
 
     t0 = time()
     elm.fit(trainData, trainLabels)

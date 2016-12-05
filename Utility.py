@@ -108,7 +108,7 @@ class Utility:
         # prepare log probabilities
         resultLogProba = resultProba
         resultLogProba[resultProba == 0] = 1e-6
-        #resultLogProba = np.log(resultLogProba)
+        #resultLogProba = np.log(resultLogProba)  # TODO comment out this line for LinearSVC and RF
 
         results = []
         for idx, proba in enumerate(resultProba):

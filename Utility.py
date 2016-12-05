@@ -13,7 +13,7 @@ class Utility:
     
         # assign every label to it's corresponding action class using annotations
         matFiles = file['matFiles/name']
-        videoIndexes = [u''.join(chr(c) for c in file[obj_ref]) for obj_ref in matFiles[0][0:20]] # FIXME : type casting is too slow
+        videoIndexes = [u''.join(chr(c) for c in file[obj_ref]) for obj_ref in matFiles[0][:]] # FIXME : type casting is too slow
         videoIndexes = [x[:-15] for x in videoIndexes]
 
         features = file['FV']

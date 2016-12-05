@@ -13,7 +13,7 @@ def trainRandomForest(trainData, trainLabels, testData, testLabels):
     trainData = np.asarray(trainData)
     trainLabels = np.asarray(trainLabels)
 
-    forest = RandomForestClassifier(n_estimators=1000, random_state=0, verbose=1, n_jobs=-1)
+    forest = RandomForestClassifier(n_estimators=1000, random_state=0, verbose=1, n_jobs=-1, max_depth=15)
     multi_target_forest = OneVsRestClassifier(forest, n_jobs=-1)
     print("\nClassifier")
     print("----------------------------------")
@@ -42,9 +42,9 @@ def trainRandomForest(trainData, trainLabels, testData, testLabels):
     return predictedProba, predictedLabels
 
 if __name__ == '__main__':
-    isLogging = True
+    isLogging = False
 
-    featureName = "FV_d3_k64" #str(sys.argv[1])
+    featureName = "FV_d2_k128" #str(sys.argv[1])
 
     if isLogging:
         old_stdout = sys.stdout
@@ -64,18 +64,19 @@ if __name__ == '__main__':
     
     #Utility.saveAnnotations(trainAnnotations, 'trainLabels.csv')
     #Utility.saveAnnotations(testAnnotations, 'testLabels.csv')
-    del featureAnnotationsDir, trainAnnotationsFile, testAnnotationsFile
-    
+
     # read baseline features
     baselineFeaturesDir = join(absolutePath, 'baseline-features')
-    featureFile = baselineFeaturesDir + sep + 'FV_d3_k64.mat'
+    featureFile = baselineFeaturesDir + sep + featureName + '.mat'
     
-    trainData, trainLabels, testData, testLabels = Utility.readBaselineIDTFeatures(featureFile, trainAnnotations, testAnnotations)
-    del baselineFeaturesDir, featureFile, trainAnnotations, testAnnotations, absolutePath, sep
+    trainData, trainLabels, trainAnnotations_subsampled, testData, testLabels, testAnnotations_subsampled = Utility.readBaselineIDTFeatures(featureFile, trainAnnotations, testAnnotations)
 
     resultsProba, resultsLabels = trainRandomForest(trainData, trainLabels, testData, testLabels)
 
-    scipy.io.savemat('Results_FV_d3_k64.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels})
+    list1 = np.array(testAnnotations_subsampled, dtype=np.object)
+    resultFileName = join(absolutePath, 'results')
+    resultFileName = join(resultFileName, 'Results_' + featureName + '.mat')
+    scipy.io.savemat(resultFileName, {'resultsProba': resultsProba, 'resultsLabels': resultsLabels, 'testAnnotations': list1})
 
     if isLogging:
         sys.stdout = old_stdout

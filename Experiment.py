@@ -10,11 +10,11 @@ if __name__ == '__main__':
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     isLogging = True
 
-    featureName = "FV_d3_k64"
+    featureName = "FV_d3_k128"
 
     if isLogging:
         old_stdout = sys.stdout
-        log_file = open("Results_" + featureName + ".log", 'w')
+        log_file = open("Results_" + featureName + "_elm.log", 'w')
         sys.stdout = log_file
 
     # initialize paths for reading process
@@ -38,10 +38,13 @@ if __name__ == '__main__':
     #scipy.io.savemat('rf_' + featureName + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels})
 
     # train one-vs-rest linear svc with 5-fold cross validation
-    resultsProba, resultsLabels = Classifier.trainLinearSVC(trainData, trainLabels, testData, testLabels)
+    #resultsProba, resultsLabels = Classifier.trainLinearSVC(trainData, trainLabels, testData, testLabels)
+
+    # train ELM Classifier
+    resultsProba, resultsLabels = Classifier.trainELMClassifier(trainData, trainLabels, testData, testLabels)
 
     list1 = np.array(testAnnotations_subsampled, dtype=np.object)
-    scipy.io.savemat('svc_' + featureName + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels, 'testAnnotations': list1})
+    scipy.io.savemat('elm_' + featureName + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels, 'testAnnotations': list1.T})
 
     if isLogging:
         sys.stdout = old_stdout

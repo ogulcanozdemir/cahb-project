@@ -7,13 +7,17 @@ from sklearn.svm import LinearSVC
 from time import time
 import numpy as np
 
-def trainRandomForest(trainData, trainLabels, testData, testLabels):
+
+def trainRandomForest(trainData, trainLabels, testData):
     print("\nTraining Random Forest Classifier...")
 
     trainData = np.asarray(trainData)
     trainLabels = np.asarray(trainLabels)
 
-    forest = RandomForestClassifier(n_estimators=1000, random_state=0, verbose=1, n_jobs=-1)
+    ne = 1000
+    rs = 0
+
+    forest = RandomForestClassifier(n_estimators=ne, random_state=rs, verbose=1, n_jobs=-1)
     multi_target_forest = OneVsRestClassifier(forest, n_jobs=-1)
     print("\nClassifier")
     print("----------------------------------")
@@ -39,9 +43,15 @@ def trainRandomForest(trainData, trainLabels, testData, testLabels):
     print("----------------------------------")
     print(predictedProba)
 
-    return predictedProba, predictedLabels
+    params = {
+        'ne': ne,
+        'rs': rs,
+    }
 
-def trainLinearSVC(trainData, trainLabels, testData, testLabels):
+    return predictedProba, predictedLabels, params
+
+
+def trainLinearSVC(trainData, trainLabels, testData):
     print("\nTraining Linear SVC...")
 
     trainData = np.asarray(trainData)
@@ -49,15 +59,16 @@ def trainLinearSVC(trainData, trainLabels, testData, testLabels):
     print(trainData.shape)
     print(trainLabels.shape)
 
+    iter = 2000
+    cross_val = 5
+
     Cs = np.power(2, np.linspace(-3, 9, num=7))
-
-    osvc = OneVsRestClassifier(LinearSVC(class_weight='balanced', verbose=False, multi_class='ovr', max_iter=2000), n_jobs=-1)
-
     parameters = {
         "estimator__C" : Cs,
     }
 
-    svc = GridSearchCV(osvc, cv=5, param_grid=parameters, n_jobs=-1)
+    osvc = OneVsRestClassifier(LinearSVC(class_weight='balanced', verbose=False, multi_class='ovr', max_iter=iter), n_jobs=-1)
+    svc = GridSearchCV(osvc, cv=cross_val, param_grid=parameters, n_jobs=-1)
 
     t0 = time()
     svc.fit(trainData, trainLabels)
@@ -86,9 +97,15 @@ def trainLinearSVC(trainData, trainLabels, testData, testLabels):
     print("----------------------------------")
     print(confidence_scores)
 
-    return confidence_scores, predictedLabels
+    params = {
+        'iter': iter,
+        'cv': cross_val,
+    }
 
-def trainELMClassifier(trainData, trainLabels, testData, testLabels):
+    return confidence_scores, predictedLabels, params
+
+
+def trainELMClassifier(trainData, trainLabels, testData):
     print("\nTraining ELM Classifier...")
 
     trainData = np.asarray(trainData)
@@ -98,13 +115,19 @@ def trainELMClassifier(trainData, trainLabels, testData, testLabels):
 
     # create initialize elm activation functions
     nh = 100
-    #rbf_rhl = RBFRandomLayer(n_hidden=nh, random_state=0, rbf_width=0.001)
-    srhl_tanh = MLPRandomLayer(n_hidden=nh, activation_func='tanh')
-    #srhl_tribas = MLPRandomLayer(n_hidden=nh, activation_func='tribas')
-    #srhl_hardlim = MLPRandomLayer(n_hidden=nh, activation_func='hardlim')
+    activation = 'tanh'
+
+    if activation == 'rbf':
+        act_layer = RBFRandomLayer(n_hidden=nh, random_state=0, rbf_width=0.001)
+    elif activation == 'tanh':
+        act_layer = MLPRandomLayer(n_hidden=nh, activation_func='tanh')
+    elif activation == 'tribas':
+        act_layer = MLPRandomLayer(n_hidden=nh, activation_func='tribas')
+    elif activation == 'hardlim':
+        act_layer = MLPRandomLayer(n_hidden=nh, activation_func='hardlim')
 
     # initialize ELM Classifier
-    elm = GenELMClassifier(hidden_layer=srhl_tanh)
+    elm = GenELMClassifier(hidden_layer=act_layer)
 
     t0 = time()
     elm.fit(trainData, trainLabels)
@@ -126,4 +149,9 @@ def trainELMClassifier(trainData, trainLabels, testData, testLabels):
     print("----------------------------------")
     print(confidence_scores)
 
-    return confidence_scores, predictedLabels
+    params = {
+        'nh': nh,
+        'af': activation,
+    }
+
+    return confidence_scores, predictedLabels, params

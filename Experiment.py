@@ -1,4 +1,5 @@
 from os.path import dirname, abspath, join, sep
+from os import rename
 from Utility import Utility
 import Classifier
 import sys
@@ -11,10 +12,13 @@ if __name__ == '__main__':
     isLogging = True
 
     featureName = "FV_d3_k128"
+    classifier = 'elm'
 
+    exp_id = classifier + "_" + featureName
+    logFileName = exp_id + ".log"
     if isLogging:
         old_stdout = sys.stdout
-        log_file = open("Results_" + featureName + "_elm.log", 'w')
+        log_file = open(logFileName, 'w')
         sys.stdout = log_file
 
     # initialize paths for reading process
@@ -33,19 +37,22 @@ if __name__ == '__main__':
 
     trainData, trainLabels, trainAnnotations_subsampled, testData, testLabels, testAnnotations_subsampled = Utility.readBaselineIDTFeatures(featureFile, trainAnnotations, testAnnotations)
 
-    # train random forest classifier
-    #resultsProba, resultsLabels = Classifier.trainRandomForest(trainData, trainLabels, testData, testLabels)
-    #scipy.io.savemat('rf_' + featureName + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels})
+    if classifier == 'rf':  # train random forest classifier
+        resultsProba, resultsLabels, params = Classifier.trainRandomForest(trainData, trainLabels, testData)
+    elif classifier == 'svc':  # train one-vs-rest linear svc with 5-fold cross validation
+        resultsProba, resultsLabels, params = Classifier.trainLinearSVC(trainData, trainLabels, testData)
+    elif classifier == 'elm':  # train ELM Classifier
+        resultsProba, resultsLabels, params = Classifier.trainELMClassifier(trainData, trainLabels, testData)
 
-    # train one-vs-rest linear svc with 5-fold cross validation
-    #resultsProba, resultsLabels = Classifier.trainLinearSVC(trainData, trainLabels, testData, testLabels)
-
-    # train ELM Classifier
-    resultsProba, resultsLabels = Classifier.trainELMClassifier(trainData, trainLabels, testData, testLabels)
+    parameters = '_'.join('{}_{}'.format(key, val) for key, val in params.items())
+    new_exp_id = exp_id + '_' + parameters
 
     list1 = np.array(testAnnotations_subsampled, dtype=np.object)
-    scipy.io.savemat('elm_' + featureName + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels, 'testAnnotations': list1.T})
+    scipy.io.savemat(new_exp_id + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels, 'testAnnotations': np.transpose(list1)})
 
     if isLogging:
         sys.stdout = old_stdout
         log_file.close()
+
+    newLogFileName = new_exp_id + ".log"
+    rename(logFileName, newLogFileName)

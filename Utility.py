@@ -2,7 +2,7 @@ import csv
 import h5py
 import numpy as np
 from os.path import join
-from sklearn.preprocessing import MultiLabelBinarizer
+
 
 class Utility:
     

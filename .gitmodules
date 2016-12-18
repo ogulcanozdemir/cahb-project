@@ -1,0 +1,3 @@
+[submodule "slr-idt-matlab"]
+	path = slr-idt-matlab
+	url = https://ogulcanozdemir@bitbucket.org/ogulcanozdemir/slr-idt-matlab.git

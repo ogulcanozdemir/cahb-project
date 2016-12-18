@@ -93,3 +93,5 @@ ENV/
 .idea/vcs.xml
 .idea/workspace.xml
 .idea/cahb-project.iml
+matlab/charades-data/*
+matlab/charades-features/*

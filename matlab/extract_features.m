@@ -9,15 +9,8 @@ videoDir = videoDir(3:end);
 featureDir = dir(featurePath); 
 featureDir = featureDir(3:end);
 
-parfor videoIdx=1:numel(videoDir),
-    videoFileName = videoDir(videoIdx).name;
-    videoFilePath = [videoPath filesep videoFileName];
-    featureZippedFilePath = [featurePath filesep videoFileName(1:end-4) '.features.gz'];
-    system(['./' executableName ' ' videoFilePath ' | gzip > ' featureZippedFilePath]);    
-end
-
 nTrajectories = [];
-for videoIdx=1:numel(videoDir),
+for videoIdx=1:numel(videoDir)
     videoFileName = videoDir(videoIdx).name;
     videoFilePath = [videoPath filesep videoFileName];
     featureZippedFilePath = [featurePath filesep videoFileName(1:end-4) '.features.gz'];

@@ -20,16 +20,18 @@ def extract(idx, filePath):
         f.write(sp.stdout.read())
 
 
-def getFinishedVideoNames():
-    finishedTxt = 'first_charades_features.txt'
+def getFinishedVideoNames(finishedTxt):
     finishedVideoNames = []
     for line in open(finishedTxt):
         finishedVideoNames.append(line[-18:-13])
-    return finishedVideoNames[2:]  # Ignore `.` and `..` case.
+    return finishedVideoNames[3:]  # Ignore `.` and `..` case.
 
 
 if __name__ == '__main__':
-    finishedVideoNames = getFinishedVideoNames()
+    txt1 = 'first_charades_features.txt'
+    txt2 = 'second_charades_features.txt'
+    finishedVideoNames = getFinishedVideoNames(txt1)
+    finishedVideoNames += getFinishedVideoNames(txt2)
     videoPathList = glob(videoPath + '*.mp4')
     unfinishedVideoPathList = []
     for videoPath in videoPathList:

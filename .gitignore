@@ -95,3 +95,4 @@ ENV/
 .idea/cahb-project.iml
 matlab/charades-data/*
 matlab/charades-features/*
+matlab/vlfeat/

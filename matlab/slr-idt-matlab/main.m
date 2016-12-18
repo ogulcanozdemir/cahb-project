@@ -1,13 +1,13 @@
 clear, close all, clc
 
 % main script
-vlfeatPath = ['D:\tools\vlfeat-0.9.20\toolbox' filesep];
+% vlfeatPath = ['D:\tools\vlfeat-0.9.20\toolbox' filesep];
 idtPathPrefix = 'D:';
 idtPath = [idtPathPrefix filesep 'database\experiment_data\slr-idt-data'];
 dataPath = ['D:\database\DEVISIGN_L' filesep];
 
 addpath('util');
-run([vlfeatPath 'vl_setup']);
+% run([vlfeatPath 'vl_setup']);
 
 % parameters
 fisherDataPath = [idtPath filesep 'fisher'];

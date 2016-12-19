@@ -1,54 +1,51 @@
 clear 
 close all  
 clc
+tic;
 
 featurePath = [pwd filesep 'charades-features'];
-[featureNames, trajectoryCounts] = calculateTrajectoryCounts(featurePath);
-
+[videoNames, trajectoryCounts] = calculateTrajectoryCounts(featurePath);
+toc;
 %%
 
-sampleSize = 1000;
+sampleSize = pow2(15);
 testSize = 1;
-i=1;
+i= randsample(1:testSize:(size(videoNames,1)-testSize),1);
 % for i = 1:testSize:(size(featureNames,1)-testSize)
 testRange = i:i+testSize-1;
-testFeatureNames = featureNames(testRange);
+testVideoNames = videoNames(testRange);
 testTrajectoryCounts = trajectoryCounts(testRange);
-trainingRange = [1:i-1 (i+testSize):size(featureNames,1)];
-trainingFeatureNames = featureNames(trainingRange);
+trainingRange = [1:i-1 (i+testSize):size(videoNames,1)];
+trainingVideoNames = videoNames(trainingRange);
 trainingTrajectoryCounts = trajectoryCounts(trainingRange);
 
-randomSamples = generateRandomSamples(featurePath, trainingFeatureNames, ...
+randomSamples = generateRandomSamples(featurePath, trainingVideoNames, ...
 trainingTrajectoryCounts, sampleSize);
-randomSamples;
+toc;
 
 %%
 
-cmpKeys = {'hog' }; %, 'hof'  , 'mbh'  , 'hog_hof', 'hog_mbh'       , 'hof_mbh', 'all'};
-cmpVals = {41:136}; %, 137:244, 245:436, 41:244   , [41:136 245:436], 137:436  , 41:436};
-componentMap = containers.Map(cmpKeys, cmpVals);
-
+cmpDim = 41:436;
 clusterCount = 64;
 repeatCount = 5;
 
 run('vlfeat/toolbox/vl_setup');
 
-for cmpIdx = 1:numel(cmpKeys)
-    cmpName = cmpKeys{cmpIdx};
-    cmpDim = componentMap(cmpName);
-    [models] = generateGMMs(randomSamples, clusterCount, cmpDim);
+[V, ~, M] = pca2(randomSamples(:,cmpDim), 0.99);
+reducedSamples = (randomSamples(:,cmpDim)-M)*V;
+[means, covariances, priors] = vl_gmm(reducedSamples', ...
+    clusterCount, 'MaxNumIterations', 10000);
+toc;
+%%
+fisherVectors = prepareFisherVectors(featurePath, videoNames, cmpDim, ...
+    means, covariances, priors, M, V);
+toc;
+%%
+testFisherVectors = fisherVectors(testRange,:);
+trainingFisherVectors = fisherVectors(trainingRange,:);
 
-%     % prepare train and test fisher vectors for each sign from original samples
-%     prepareFisherVectors(dataPath, models, repeatCount, cmpDim, trainRange, nSigns, 'save', [fisherDataPath filesep trainName]);
-%     prepareFisherVectors(dataPath, models, repeatCount, cmpDim, testRange, nSigns, 'save', [fisherDataPath filesep testName]);
-% 
-%     prepareDataForSVM([fisherDataPath filesep trainName], repeatCount, svmDataPath, trainName);
-%     prepareDataForSVM([fisherDataPath filesep testName], repeatCount, svmDataPath, testName);
-%     clear modeledData models;
-% 
-%     delete([fisherDataPath filesep trainName]);
-%     delete([fisherDataPath filesep testName]);
-end
-    
-% end
-% toc;
+model = KDTreeSearcher(trainingFisherVectors);
+[n,d] = knnsearch(model,testFisherVectors);
+videoNames(testRange)
+videoNames(n)
+toc;

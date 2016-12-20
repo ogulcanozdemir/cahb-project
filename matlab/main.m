@@ -44,8 +44,13 @@ toc;
 testFisherVectors = fisherVectors(testRange,:);
 trainingFisherVectors = fisherVectors(trainingRange,:);
 
+save('fv.mat','videoNames','fisherVectors');
+
 model = KDTreeSearcher(trainingFisherVectors);
 [n,d] = knnsearch(model,testFisherVectors);
 videoNames(testRange)
 videoNames(n)
 toc;
+
+%%
+

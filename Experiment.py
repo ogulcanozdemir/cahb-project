@@ -1,4 +1,4 @@
-from os.path import dirname, abspath, join, sep
+from os.path import dirname, abspath, join, sep, realpath
 from os import rename
 from Utility import Utility
 import Classifier
@@ -22,9 +22,8 @@ if __name__ == '__main__':
         sys.stdout = log_file
 
     # initialize paths for reading process
-    absolutePath = dirname(dirname(dirname(abspath("__file__"))))
-    featureAnnotationsDir = join(absolutePath, 'feature-annotations')
-    
+    featureAnnotationsDir = join(dirname(realpath(__file__)), 'feature-annotations')
+
     # read feature annotations of charades dataset
     trainAnnotationsFile = featureAnnotationsDir + sep + 'charades_v04_train.csv'
     testAnnotationsFile = featureAnnotationsDir + sep + 'charades_v04_test.csv'
@@ -32,10 +31,11 @@ if __name__ == '__main__':
     testAnnotations = Utility.readAnnotations(testAnnotationsFile)
 
     # read baseline features
-    baselineFeaturesDir = join(absolutePath, 'baseline-features')
+    baselineFeaturesDir = join(dirname(realpath(__file__)), 'baseline-features')
     featureFile = baselineFeaturesDir + sep + featureName + '.mat'
 
-    trainData, trainLabels, trainAnnotations_subsampled, testData, testLabels, testAnnotations_subsampled = Utility.readBaselineIDTFeatures(featureFile, trainAnnotations, testAnnotations)
+    trainData, trainLabels, trainAnnotations_subsampled, testData, testLabels, testAnnotations_subsampled = Utility.readBaselineIDTFeatures(
+        featureFile, trainAnnotations, testAnnotations)
 
     if classifier == 'rf':  # train random forest classifier
         resultsProba, resultsLabels, params = Classifier.trainRandomForest(trainData, trainLabels, testData)
@@ -48,7 +48,8 @@ if __name__ == '__main__':
     new_exp_id = exp_id + '_' + parameters
 
     list1 = np.array(testAnnotations_subsampled, dtype=np.object)
-    scipy.io.savemat(new_exp_id + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels, 'testAnnotations': np.transpose(list1)})
+    scipy.io.savemat(new_exp_id + '.mat', {'resultsProba': resultsProba, 'resultsLabels': resultsLabels,
+                                           'testAnnotations': np.transpose(list1)})
 
     if isLogging:
         sys.stdout = old_stdout

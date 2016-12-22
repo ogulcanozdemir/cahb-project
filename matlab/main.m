@@ -9,7 +9,7 @@ save('trajectoryCounts.mat');
 toc;
 %%
 
-sampleSize = pow2(15);
+sampleSize = pow2(20);
 testSize = 1;
 i= randsample(1:testSize:(size(videoNames,1)-testSize),1);
 % for i = 1:testSize:(size(featureNames,1)-testSize)
@@ -52,4 +52,4 @@ model = KDTreeSearcher(trainingFisherVectors);
 [n,d] = knnsearch(model,testFisherVectors);
 videoNames(testRange)
 videoNames(n)
-toc;
+toc;    

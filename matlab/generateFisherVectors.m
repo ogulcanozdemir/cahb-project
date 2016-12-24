@@ -6,7 +6,7 @@ disp(['Generating Fisher Vectors for parameters: k = ', num2str(nCluster), ....
 %% Prepare paths
 addpath('util');
 addpath('features');
-run([pwd filesep 'util' filesep 'vlfeat' filesep 'toolbox' filesep 'vl_setup']);
+run([pwd filesep 'util' filesep 'vlfeat' filesep 'toolbox' filesep 'vl_setup.m']);
 
 [parentDir, ~, ~] = fileparts(fileparts(pwd));
 trainingFeaturePath = [parentDir filesep 'training'];

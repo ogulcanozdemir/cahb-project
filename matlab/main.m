@@ -5,10 +5,10 @@ tic;
 
 featurePath = [pwd filesep 'charades-features'];
 [videoNames, trajectoryCounts] = calculateTrajectoryCounts(featurePath);
-save('trajectoryCounts.mat');
+save('trajectoryCounts.mat','-v7.3');
 toc;
 %%
-
+tic;
 sampleSize = pow2(20);
 testSize = 1;
 i= randsample(1:testSize:(size(videoNames,1)-testSize),1);
@@ -22,30 +22,32 @@ trainingTrajectoryCounts = trajectoryCounts(trainingRange);
 
 randomSamples = generateRandomSamples(featurePath, trainingVideoNames, ...
 trainingTrajectoryCounts, sampleSize);
-save('randomSamples.mat');
+save('randomSamples.mat','-v7.3');
 toc;
 
 %%
-
+tic;
 cmpDim = 41:436;
 clusterCount = 64;
-repeatCount = 5;
+maxIterations = pow2(15);
 
 run('vlfeat/toolbox/vl_setup');
 
 [V, ~, M] = pca2(randomSamples(:,cmpDim), 0.99);
 reducedSamples = (randomSamples(:,cmpDim)-M)*V;
 [means, covariances, priors] = vl_gmm(reducedSamples', ...
-    clusterCount, 'MaxNumIterations', 10000);
-save('gmms.mat');
+    clusterCount, 'MaxNumIterations', maxIterations);
+save('gmms.mat','-v7.3');
 toc;
 %%
+tic;
 fisherVectors = prepareFisherVectors(featurePath, videoNames, cmpDim, ...
     means, covariances, priors, M, V);
-save('fishers.mat');
+save('fishers.mat','-v7.3');
 save('fv.mat','videoNames','fisherVectors');
 toc;
 %%
+tic;
 testFisherVectors = fisherVectors(testRange,:);
 trainingFisherVectors = fisherVectors(trainingRange,:);
 model = KDTreeSearcher(trainingFisherVectors);

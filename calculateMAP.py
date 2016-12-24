@@ -11,6 +11,7 @@ from sklearn.metrics import average_precision_score
 from sklearn.externals import joblib
 
 annotationDir = os.path.dirname(os.path.realpath(__file__)) + os.sep + 'feature-annotations'
+
 trainingAnnotationPath = annotationDir + os.sep + 'Charades_v1_train.csv'
 testAnnotationPath = annotationDir + os.sep + 'Charades_v1_test.csv'
 
@@ -38,7 +39,7 @@ with open(testAnnotationPath) as csvfile:
                 labels.append(int(action[1:4]))
         testLabels[row['id']] = labels
 
-mat = scipy.io.loadmat('matlab' + os.sep + 'fv128.mat')
+mat = scipy.io.loadmat('matlab' + os.sep + 'fv.mat')
 fisherVectors = mat['fisherVectors']
 
 videoNames = []
@@ -75,31 +76,14 @@ print('Number of actions: ', len(availableLabelNames))
 print('Number of Training Videos: ', len(availableTrainingVideos))
 print('Number of Test Videos: ', len(availableTestVideos))
 
-classifier = OneVsRestClassifier(LinearSVC(random_state=0, verbose=3))
-classifier.fit(trainingFishers, binarizedLabels)
+confidenceScores = []
 
-joblib.dump(classifier, 'trainedLSVC128.pkl')
+with open('confidenceScores.txt') as f:
+    for line in f:
+        confidenceScores.append([np.exp(float(s)) for s in line.split(' ')[1:]])
+confidenceScores = np.array(confidenceScores)
 
-predictedLabels = classifier.predict(testFishers)
-confidenceScores = classifier.decision_function(testFishers)
-
-with open('confidenceScores128.txt', 'w') as f:
-    for i, row in enumerate(confidenceScores):
-        f.write(availableTestVideos[i] + ' ')
-        f.write(' '.join([str(s) for s in row]))
-        f.write(os.linesep)
-
+# np.seterr(divide='ignore', invalid='ignore')
 precision = average_precision_score(binarizer.transform(availableTestLabels), confidenceScores)
-print('==========')
-print('Number of actions: ', len(availableLabelNames))
-print('Number of Training Videos: ', len(availableTrainingVideos))
-print('Number of Test Videos: ', len(availableTestVideos))
 print('AP: ', precision)
 
-# with open(testAnnotationPath) as inCsvfile, open('test.csv', 'a') as outCsvfile:
-#     reader = csv.DictReader(inCsvfile)
-#     writer = csv.DictWriter(outCsvfile, fieldnames=reader.fieldnames)
-#     writer.writeheader()
-#     for row in reader:
-#         if row['id'] in availableTestVideos:
-#             writer.writerow(row)

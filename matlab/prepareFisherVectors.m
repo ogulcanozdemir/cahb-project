@@ -6,12 +6,14 @@ function [fisherVectors] = prepareFisherVectors(featurePath, videoNames, ...
     fisherVectors = zeros(length(videoNames),fisherVectorSize);
     
     for i=1:length(videoNames)
-        featureZippedFilePath = strjoin([featurePath filesep videoNames(i) '.features.gz'],'');      
+        fprintf('idx = %d/%d, videoName = %s\n', i, length(videoNames), videoNames{i});
+        featureZippedFilePath = [featurePath filesep videoNames{i} '.features.gz'];      
         gunzip(featureZippedFilePath);
         featureFilePath = featureZippedFilePath(1:end-3);
         localFeatures = dlmread(featureFilePath);
         
-        reducedFeatures = (localFeatures(:,cmpDim)-M)*V;
+        subLocalFeatures = localFeatures(:,cmpDim);
+        reducedFeatures = (subLocalFeatures - repmat(M, size(subLocalFeatures, 1), 1)) * V;
         fisherVectors(i,:) = vl_fisher(reducedFeatures', means, covariances, priors)';
 
         delete(featureFilePath);

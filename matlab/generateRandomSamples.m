@@ -1,5 +1,6 @@
 function [randomSamples] = generateRandomSamples(featurePath, videoNames, ...
     trajectoryCounts, sampleSize)
+
     featureSize = 436;
     randomSamples = zeros(sampleSize,featureSize);
     
@@ -11,7 +12,7 @@ function [randomSamples] = generateRandomSamples(featurePath, videoNames, ...
     sampleIdx = 1;
     for i=1:size(videoNames,1)
         ceilIdx = ceilIdx + trajectoryCounts(i);
-        featureZippedFilePath = strjoin([featurePath filesep videoNames(i) '.features.gz'],'');      
+        featureZippedFilePath = [featurePath, filesep, videoNames{i}, '.features.gz'];      
         gunzip(featureZippedFilePath);
         featureFilePath = featureZippedFilePath(1:end-3);
         localFeatures = dlmread(featureFilePath);

@@ -12,7 +12,7 @@ executable = dirPath + os.sep + 'DenseTrackStab'
 
 
 def extract(idx, filePath):
-    print str(idx) + " : " + filePath
+    print(str(idx) + " : " + filePath)
     fileName = os.path.basename(filePath)
     sp = subprocess.Popen([executable, filePath], stdout=subprocess.PIPE)
     dest = featurePath + fileName[:-4] + '.features.gz'
